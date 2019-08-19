@@ -1,0 +1,23 @@
+---
+# tasks file for homeserver
+
+- name: Install cockpit
+  become: true
+  apt:
+    name: cockpit
+    state: present
+
+- name: Enable cockpit
+  become: true
+  systemd:
+    name: cockpit
+    state: started
+    enabled: true
+
+- name: Install monitoring tools
+  become: true
+  apt:
+    name:
+      - smartmontools
+      - lm-sensors
+    state: present

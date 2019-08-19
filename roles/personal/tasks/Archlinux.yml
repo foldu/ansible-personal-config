@@ -1,0 +1,145 @@
+---
+- name: Install user Arch packages
+  become: true
+  pacman:
+    name:
+      # essentials
+      - sway
+      - mako
+      - grim
+      - slurp
+      - alacritty
+      - neovim
+      - htop
+
+      # browsers
+      - firefox-developer-edition
+      - riot-desktop
+      - wire-desktop
+      - chromium
+      - firefox
+
+      # dev
+      - gcc
+      - clang
+      - llvm
+      - lld
+      - lldb
+      - strace
+      - ltrace
+      - perf
+      - bpf
+      - cmake
+      - meson
+      - make
+      - rustup
+      - python
+      - ipython
+      - poetry
+      - python-language-server
+      - python-black
+      - flake8
+      - podman
+      - nodejs
+      - yarn
+      - npm
+      - prettier
+      - ripgrep
+      - yamllint
+      - zeal
+
+      # dev utils
+      - d-feet
+
+      # stuff
+      - pacman-contrib
+      - ansible-lint
+      - ansible
+      - hub
+      - xsel
+      - xclip
+      - yarn
+      - wget
+      - dolphin
+      - zip
+      - unzip
+      - mupdf
+
+      # media
+      - mpv
+      - ffmpeg
+      - youtube-dl
+      - mpd
+      - streamlink
+      - ncmpcpp
+
+      # sound stuff
+      - pulseaudio
+      - alsa-utils
+
+      # fonts
+      - noto-fonts
+      - noto-fonts-cjk
+      - ttf-fira-mono
+      - adobe-source-code-pro-fonts
+      - cantarell-fonts
+      - noto-fonts-emoji
+      - noto-fonts-extra
+      - ttf-dejavu
+      - ttf-inconsolata
+      - ttf-droid
+      - ttf-liberation
+
+      # themes
+      - breeze-icons
+      - breeze-gtk
+      - breeze
+      # needed for setting qt settings without plasma
+      - qt5ct
+
+      # image editing
+      - gimp
+      - imagemagick
+      - exiv2
+      - grim
+      - slurp
+    state: present
+  tags: [installation]
+
+# needed for rootless podman to work properly
+- name: Add subuids and subgids to barnabas
+  become: true
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/{{ item }}"
+  with_items:
+    - subuid
+    - subgid
+  tags: [podman]
+
+# also needed for rootless podman
+- name: Allow users to create user namespaces
+  become: true
+  sysctl:
+    name: kernel.unprivileged_userns_clone
+    sysctl_file: "/etc/sysctl.d/90-userns.conf"
+    value: "1"
+  tags: [podman]
+
+- name: Set font renderer to infinality style
+  become: true
+  lineinfile:
+    path: /etc/profile.d/freetype2.sh
+    line: 'export FREETYPE_PROPERTIES="truetype:interpreter-version=38"'
+    regexp: 'export FREETYPE_PROPERTIES='
+
+- name: Enable some fontconfig stuff
+  become: true
+  file:
+    path: "/etc/fonts/conf.d/{{ item }}"
+    src: "/etc/fonts/conf.avail/{{ item }}"
+    state: link
+  loop:
+    - 70-no-bitmaps.conf
+    - 10-sub-pixel-rgb.conf
+    - 11-lcdfilter-default.conf

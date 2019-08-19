@@ -1,0 +1,46 @@
+---
+- import_tasks: my_user.yml
+
+- include_tasks: "{{ ansible_os_family }}.yml"
+
+- import_tasks: firewall.yml
+
+- name: Sync ansible hosts inventory yaml
+  become: true
+  copy:
+    src: inventory.yml
+    dest: /etc/ansible/hosts
+    mode: '0644'
+  tags: [ansible-sync]
+
+- name: Enable redshift
+  systemd:
+    name: redshift
+    enabled: true
+    state: started
+    scope: user
+
+- name: Enable mpd
+  systemd:
+    name: mpd
+    enabled: true
+    state: started
+    scope: user
+
+- name: Copy over ssh-agent service configs
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: "pam_environment"
+      dest: "{{ lookup('env', 'HOME') }}/.pam_environment"
+    - src: "ssh-agent.service"
+      dest: "{{ lookup('env', 'HOME') }}/.config/systemd/user/ssh-agent.service" }
+
+- name: Enable ssh agent
+  systemd:
+    name: ssh-agent
+    daemon_reload: true
+    enabled: true
+    state: started
+    scope: user

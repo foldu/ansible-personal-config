@@ -1,0 +1,17 @@
+---
+- name: Install Debian family specific packages
+  become: true
+  apt:
+    name:
+      - python3
+      - ipython3
+    state: present
+  tags: [installation]
+
+- name: Install Debian family nfs package
+  become: true
+  apt:
+    name:
+      - nfs-utils
+    state: present
+  tags: [installation]

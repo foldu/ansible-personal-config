@@ -1,0 +1,14 @@
+---
+# defaults file for home-nfs-client
+nfs_home_host: "192.168.1.100"
+
+nfs_home_opts: "rsize=32768,wsize=32768,timeo=14,intr,_netdev,relatime"
+nfs_home_extra_opts: []
+
+nfs_home_dirs:
+  - mountpoint: /media/aux
+    share: "{{ nfs_home_host }}:/srv/nfs/aux"
+  - mountpoint: /media/main
+    share: "{{ nfs_home_host }}:/srv/nfs/main"
+  - mountpoint: /media/bak
+    share: "{{ nfs_home_host }}:/srv/nfs/bak"

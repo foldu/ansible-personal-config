@@ -1,0 +1,27 @@
+---
+# tasks file for home-nfs-client
+- name: Ensure nfs-utils is installed
+  become: true
+  pacman:
+    name: nfs-utils
+    state: present
+
+- name: Create NFS dirs and change owner
+  become: true
+  file:
+    path: "{{ item.mountpoint }}"
+    owner: barnabas
+    group: barnabas
+    state: directory
+  loop: "{{ nfs_home_dirs }}"
+
+- name: Copy mount info to fstab
+  become: true
+  mount:
+    boot: false
+    fstype: nfs4
+    name: "{{ item.mountpoint }}"
+    opts: "{{ nfs_home_opts }}{% if nfs_home_extra_opts | length > 0 %},{% endif %}{{ nfs_home_extra_opts | join(',') }}"
+    src: "{{ item.share }}"
+    state: present
+  loop: "{{ nfs_home_dirs }}"

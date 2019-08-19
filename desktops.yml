@@ -1,0 +1,5 @@
+---
+- hosts: desktops
+  roles:
+    - desktop
+    - home-nfs-client

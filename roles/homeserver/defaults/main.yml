@@ -1,0 +1,4 @@
+---
+# defaults file for homeserver
+
+nfs_main_mount: /srv/nfs/main

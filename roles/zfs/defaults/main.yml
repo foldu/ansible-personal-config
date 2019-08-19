@@ -1,0 +1,5 @@
+---
+# defaults file for zfs
+zfs_devices: []
+
+zfs_scrub_interval: weekly

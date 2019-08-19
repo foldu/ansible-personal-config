@@ -1,0 +1,109 @@
+---
+
+- hosts: homeserver
+  vars:
+    nfs_exports:
+      - "/srv/nfs/main 192.168.1.0/24(rw,no_root_squash,async)"
+      - "/srv/nfs/aux 192.168.1.0/24(rw,no_root_squash,async)"
+      - "/srv/nfs/bak 192.168.1.0/24(rw,no_root_squash,async)"
+    zfs_devices:
+      - Alsergrund
+      - Hietzing
+      - main
+    zfs_scrub_interval: weekly
+    samba_users:
+      - name: barnabas
+        password: "{{ samba_password }}"
+    samba_shares:
+      - name: trash
+        write_list: barnabas
+        valid_users: barnabas
+        group: barnabas
+        path: /srv/nfs/main/smb
+
+    service_dir: "{{ nfs_main_mount }}/services"
+
+    podman_services:
+      - name: pi-hole
+        image: pihole/pihole:latest
+        description: pi-hole dns
+        user: root
+        env:
+          TZ: Europe/Amsterdam
+          DNS1: 1.1.1.1
+        ports:
+          - host: 8000
+            container: 80
+            type: tcp
+          - host: 53
+            container: 53
+            type: tcp
+          - host: 53
+            container: 53
+            type: udp
+          - host: 67
+            container: 67
+            type: udp
+        volumes:
+          - host: "{{ service_dir }}/pihole/pihole"
+            container: /etc/pihole
+          - host: "{{ service_dir }}/pihole/dnsmasq.d"
+            container: /etc/dnsmasq.d
+        dns:
+          - 127.0.0.1
+          - 1.1.1.1
+        use_host_net: false
+
+      - name: transmission
+        image: linuxserver/transmission
+        description: Transmission torrent client
+        user: root
+        env:
+          PUID: 1000
+          PGUID: 1000
+          TZ: Europe/Amsterdam
+        ports:
+          - host: 9091
+            container: 9091
+            type: tcp
+          - host: 51413
+            container: 51413
+            type: tcp
+          - host: 51413
+            container: 51413
+            type: udp
+        volumes:
+          - host: '{{ service_dir }}/transmission/config'
+            container: /config
+          - host: "{{ service_dir }}/transmission/watch"
+            container: /watch
+          - host: /srv/nfs/aux/downloads
+            container: /downloads
+        dns: []
+        use_host_net: false
+
+      - name: unifi
+        image: jacobalberty/unifi:stable
+        description: Unifi web thing
+        user: barnabas
+        env:
+          TZ: Europe/Amsterdam
+          RUNAS_UID0: 'false'
+          UNIFI_UID: 1000
+          UNIFI_GID: 1000
+        ports: []
+        volumes:
+          - host: "{{ service_dir }}/unifi"
+            container: /unifi
+        dns: []
+        use_host_net: true
+
+  roles:
+    - homeserver
+    - role: geerlingguy.nfs
+      become: true
+    - role: zfs
+      become: true
+    - role: bertvv.samba
+      become: true
+    - podman-services

@@ -1,0 +1,3 @@
+---
+zerotier_api_key: "{{ vault_zerotier_api_key }}"
+samba_password: "{{ vault_samba_password }}"

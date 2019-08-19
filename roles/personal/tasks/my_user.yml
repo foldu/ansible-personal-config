@@ -1,0 +1,25 @@
+---
+- name: Ensure my group exists
+  become: true
+  group:
+    name: barnabas
+    gid: 1000
+    state: present
+
+- name: Ensure my user config is correct
+  become: true
+  user:
+    name: barnabas
+    move_home: true
+    home: /home/barnabas
+    shell: /usr/bin/fish
+    uid: 1000
+    groups:
+      - barnabas
+      - wheel
+      - video
+      - audio
+      # printing
+      - lp
+      # accessing /dev/tty*
+      # - uucp

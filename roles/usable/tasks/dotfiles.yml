@@ -1,0 +1,5 @@
+---
+- name: Fetch me dotfiles
+  git:
+    repo: "{{ dotfile_repo }}"
+    dest: "{{ lookup('env', 'HOME') }}/dotfiles"

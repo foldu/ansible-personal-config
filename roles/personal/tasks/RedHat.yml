@@ -1,0 +1,104 @@
+- name: Ensure fastestmirror is enabled
+  become: true
+  lineinfile:
+    path: /etc/dnf/dnf.conf
+    state: present
+    regexp: '^fastestmirror='
+    line: 'fastestmirror=true'
+  tags: ['install']
+
+- name: Disable SELinux
+  become: true
+  selinux:
+    state: disabled
+
+- name: install the rpmfusion repo packages
+  become: true
+  dnf:
+    name:
+      - https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_distribution_major_version }}.noarch.rpm
+      - https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_distribution_major_version }}.noarch.rpm
+    state: present
+
+- name: Check if alacritty copr repo file exists
+  stat:
+    path: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:pschyska:alacritty.repo
+  register: alacritty_repo
+
+- name: Install intel wireless drivers
+  dnf:
+    name: "iwl*-firmware"
+    state: present
+  become: true
+
+- name: Add alacritty copr repo
+  command: "dnf copr enable -y pschyska/alacritty"
+  become: true
+  when: not alacritty_repo.stat.exists
+
+- name: Install all my shit
+  become: true
+  dnf:
+    name:
+      # environment
+      - '@sway:rolling/default'
+      - '@fish:3'
+      - firefox
+      - firefox-wayland
+      - chromium
+      - flatpak
+      - alacritty
+      - NetworkManager-wifi
+      - NetworkManager-tui
+      - xorg-x11-drv-intel
+      - mesa-dri-drivers
+      - nfs-utils
+      - pulseaudio-utils
+      - alsa-utils
+      # dev
+      - '@tokei:rolling'
+      - '@cbindgen:rolling'
+      - '@postgresql:11/client'
+      - '@ripgrep:latest'
+      - '@hyperfine:latest'
+      - python3-ipython
+      - podman
+      - python3-ansible-lint
+      - ansible
+      - docker
+      - docker-fish-completion
+      - podman
+      - nodejs-yarn
+      - rpm-build
+      # media stuff
+      - python3-streamlink
+      - mpd
+      - ncmpcpp
+      - mpv
+      - ffmpeg
+    state: present
+
+- name: Add the flathub flatpak repository remote to the user installation
+  flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+    method: user
+
+- name: Install wire flatpak
+  flatpak:
+    name: com.wire.WireDesktop
+    state: present
+    method: user
+
+- name: Install riot flatpak
+  flatpak:
+    name: im.riot.Riot
+    state: present
+    method: user
+
+- name: Install gimp flatpak
+  flatpak:
+    name: org.gimp.GIMP
+    state: present
+    method: user

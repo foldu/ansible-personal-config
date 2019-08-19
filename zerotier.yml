@@ -1,0 +1,8 @@
+---
+- hosts: home
+  vars:
+    zerotier_network_id: c7c8172af1952d70
+    zerotier_accesstoken: "{{ zerotier_api_key }}"
+  roles:
+    - role: m4rcu5nl.zerotier-one
+      become: true

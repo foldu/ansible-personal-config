@@ -1,0 +1,18 @@
+[Unit]
+Description={{ item.description }}
+
+[Service]
+Type=simple
+User={{ item.user }}
+ExecStartPre=-/usr/bin/podman rm "{{ item.name }}"
+
+ExecStart=/usr/bin/podman run --systemd=false --name "{{ item.name }}" {% for port in item.ports %} -p {{ port.host }}:{{ port.container }}/{{ port.type }} {% endfor %} {% for volume in item.volumes %} -v {{ volume.host }}:{{ volume.container }} {% endfor %} {% for key, val in item.env.items() %} -e {{ key }}={{ val }} {% endfor %} {% for d in item.dns %} --dns={{ d }} {% endfor %} {% if item.use_host_net %} --net=host {% endif %} "{{ item.image }}"
+
+ExecReload=-/usr/bin/podman stop "{{ item.name }}"
+ExecReload=-/usr/bin/podman rm "{{ item.name }}"
+ExecStop=-/usr/bin/podman stop "{{ item.name }}"
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

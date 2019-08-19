@@ -1,0 +1,8 @@
+---
+- hosts: laptops
+  vars:
+    nfs_home_extra_opts:
+      - noauto
+  roles:
+    - laptop
+    - home-nfs-client

@@ -1,0 +1,17 @@
+---
+# tasks file for zfs
+- name: Copy over systemd service
+  copy:
+    src: zfs-scrub@.service
+    dest: /etc/systemd/system
+
+- name: Template systemd timer
+  template:
+    src: zfs-scrub@.timer.j2
+    dest: /etc/systemd/system/zfs-scrub@.timer
+
+- name: Enable timers for all devices
+  systemd:
+    name: "zfs-scrub@{{ item }}.timer"
+    enabled: true
+  loop: "{{ zfs_devices }}"

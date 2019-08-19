@@ -1,0 +1,13 @@
+---
+- name: Install things I need to feel comfy
+  become: true
+  package:
+    name:
+      - neovim
+      - tmux
+      - perl
+      - fish
+      - git
+    state: present
+
+- import_tasks: dotfiles.yml
