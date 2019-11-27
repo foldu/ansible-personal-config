@@ -1,5 +1,6 @@
 ---
 - name: Install ufw
+  become: true
   package:
     name: ufw
     state: present
@@ -18,7 +19,7 @@
     # syncthing
     - port: 22000
       proto: tcp
-    - port: 21027,
+    - port: 21027
       proto: udp
   tags: [firewall]
 

@@ -35,7 +35,7 @@
     - src: "pam_environment"
       dest: "{{ lookup('env', 'HOME') }}/.pam_environment"
     - src: "ssh-agent.service"
-      dest: "{{ lookup('env', 'HOME') }}/.config/systemd/user/ssh-agent.service" }
+      dest: "{{ lookup('env', 'HOME') }}/.config/systemd/user/ssh-agent.service"
 
 - name: Enable ssh agent
   systemd:

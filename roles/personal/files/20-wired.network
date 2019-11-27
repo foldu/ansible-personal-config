@@ -1,0 +1,10 @@
+[Match]
+Name=enp*
+# exception for unused eth
+Name=!enp5s0
+
+[Network]
+DHCP=ipv4
+
+[DHCP]
+RouteMetric=10

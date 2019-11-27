@@ -1,5 +1,4 @@
 ---
-
 - hosts: homeserver
   vars:
     nfs_exports:
@@ -73,7 +72,7 @@
             container: 51413
             type: udp
         volumes:
-          - host: '{{ service_dir }}/transmission/config'
+          - host: "{{ service_dir }}/transmission/config"
             container: /config
           - host: "{{ service_dir }}/transmission/watch"
             container: /watch
@@ -88,7 +87,7 @@
         user: barnabas
         env:
           TZ: Europe/Amsterdam
-          RUNAS_UID0: 'false'
+          RUNAS_UID0: "false"
           UNIFI_UID: 1000
           UNIFI_GID: 1000
         ports: []

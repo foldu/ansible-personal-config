@@ -1,110 +1,118 @@
 ---
-- name: Install user Arch packages
-  become: true
-  pacman:
-    name:
-      # essentials
-      - sway
-      - mako
-      - grim
-      - slurp
-      - alacritty
-      - neovim
-      - htop
+#- name: Install user Arch packages
+#  become: true
+#  pacman:
+#    name:
+#      # essentials
+#      - sway
+#      - mako
+#      - grim
+#      - slurp
+#      #- alacritty
+#      - neovim
+#      - htop
+#
+#      # browsers
+#      - firefox-developer-edition
+#      - wire-desktop
+#      - chromium
+#      - firefox
+#
+#      # dev
+#      - gcc
+#      - clang
+#      - llvm
+#      - lld
+#      - lldb
+#      - strace
+#      - ltrace
+#      - perf
+#      - bpf
+#      - cmake
+#      - meson
+#      - make
+#      - rustup
+#      - python
+#      - ipython
+#      - poetry
+#      - python-language-server
+#      - python-black
+#      - flake8
+#      - podman
+#      - nodejs
+#      - yarn
+#      - npm
+#      - prettier
+#      - ripgrep
+#      - yamllint
+#      - zeal
+#      - shfmt
+#      - openocd
+#      - arm-none-eabi-gdb
+#      - qemu-arch-extra
+#
+#      # dev utils
+#      - d-feet
+#      - siege
+#
+#      # stuff
+#      - pacman-contrib
+#      - ansible-lint
+#      - ansible
+#      - hub
+#      - xsel
+#      - xclip
+#      - yarn
+#      - wget
+#      - dolphin
+#      - zip
+#      - unzip
+#      - mupdf
+#
+#      # media
+#      - mpv
+#      - ffmpeg
+#      - youtube-dl
+#      - mpd
+#      - streamlink
+#      - ncmpcpp
+#
+#      # sound stuff
+#      - pulseaudio
+#      - alsa-utils
+#
+#      # fonts
+#      - noto-fonts
+#      - noto-fonts-cjk
+#      - ttf-fira-mono
+#      - adobe-source-code-pro-fonts
+#      - cantarell-fonts
+#      - noto-fonts-emoji
+#      - noto-fonts-extra
+#      - ttf-dejavu
+#      - ttf-inconsolata
+#      - ttf-droid
+#      - ttf-liberation
+#
+#      # themes
+#      - breeze-icons
+#      - breeze-gtk
+#      - breeze
+#      # needed for setting qt settings without plasma
+#      - qt5ct
+#
+#      # image editing
+#      - gimp
+#      - imagemagick
+#      - exiv2
+#      - grim
+#      - slurp
+#    state: present
+#  tags: [installation]
 
-      # browsers
-      - firefox-developer-edition
-      - riot-desktop
-      - wire-desktop
-      - chromium
-      - firefox
-
-      # dev
-      - gcc
-      - clang
-      - llvm
-      - lld
-      - lldb
-      - strace
-      - ltrace
-      - perf
-      - bpf
-      - cmake
-      - meson
-      - make
-      - rustup
-      - python
-      - ipython
-      - poetry
-      - python-language-server
-      - python-black
-      - flake8
-      - podman
-      - nodejs
-      - yarn
-      - npm
-      - prettier
-      - ripgrep
-      - yamllint
-      - zeal
-
-      # dev utils
-      - d-feet
-
-      # stuff
-      - pacman-contrib
-      - ansible-lint
-      - ansible
-      - hub
-      - xsel
-      - xclip
-      - yarn
-      - wget
-      - dolphin
-      - zip
-      - unzip
-      - mupdf
-
-      # media
-      - mpv
-      - ffmpeg
-      - youtube-dl
-      - mpd
-      - streamlink
-      - ncmpcpp
-
-      # sound stuff
-      - pulseaudio
-      - alsa-utils
-
-      # fonts
-      - noto-fonts
-      - noto-fonts-cjk
-      - ttf-fira-mono
-      - adobe-source-code-pro-fonts
-      - cantarell-fonts
-      - noto-fonts-emoji
-      - noto-fonts-extra
-      - ttf-dejavu
-      - ttf-inconsolata
-      - ttf-droid
-      - ttf-liberation
-
-      # themes
-      - breeze-icons
-      - breeze-gtk
-      - breeze
-      # needed for setting qt settings without plasma
-      - qt5ct
-
-      # image editing
-      - gimp
-      - imagemagick
-      - exiv2
-      - grim
-      - slurp
-    state: present
-  tags: [installation]
+# TODO
+# What to do about haskell packages like pandoc and shellcheck?
+# I don't want to install 2GB of dynamically linked haskell libraries
 
 # needed for rootless podman to work properly
 - name: Add subuids and subgids to barnabas
@@ -143,3 +151,19 @@
     - 70-no-bitmaps.conf
     - 10-sub-pixel-rgb.conf
     - 11-lcdfilter-default.conf
+
+- name: Copy over systemd-networkd config
+  become: true
+  copy:
+    src: "{{ item }}"
+    dest: /etc/systemd/network
+  loop:
+    - "20-wired.network"
+    - "25-wlan.network"
+
+- name: Enable systemd-networkd
+  become: true
+  systemd:
+    name: systemd-networkd
+    enabled: true
+    state: started
