@@ -21,3 +21,87 @@
       - smartmontools
       - lm-sensors
     state: present
+
+- name: Install docker-py
+  become: true
+  apt:
+    name: python3-docker
+    state: present
+
+- name: Install pip3
+  become: true
+  apt:
+    name: python3-pip
+    state: present
+
+- name: Install docker-compose-py with pip
+  become: true
+  pip:
+    name: "docker-compose==1.25.0"
+
+- name: transmission in docker-compose
+  become: true
+  docker_compose:
+    project_name: transmission
+    definition:
+      version: '2'
+      services:
+        transmission:
+          image: linuxserver/transmission
+          environment:
+            PUID: 1000
+            PGUID: 1000
+            TZ: Europe/Amsterdam
+          volumes:
+            - "{{ service_dir }}/transmission/config:/config"
+            - "/srv/nfs/aux/downloads:/downloads"
+            - "{{ service_dir }}/transmission/watch:/watch"
+          ports:
+            - 9091:9091
+            - 51413:51413
+            - 51413:51413/udp
+          restart: unless-stopped
+
+- name: pi-hole in docker-compose
+  become: true
+  docker_compose:
+    project_name: pi-hole
+    definition:
+      version: '2'
+      services:
+        pi-hole:
+          image: pihole/pihole:latest
+          environment:
+            TZ: Europe/Amsterdam
+            DNS1: 1.1.1.1
+          volumes:
+            - "{{ service_dir }}/pihole/pihole:/etc/pihole"
+            - "{{ service_dir }}/pihole/dnsmasq.d:/etc/dnsmasq.d"
+          dns:
+            - 127.0.0.1
+            - 1.1.1.1
+          ports:
+            - 8000:80
+            - 53:53
+            - 53:53/udp
+            - 67:67/udp
+          restart: unless-stopped
+
+- name: unifi in docker-compose
+  become: true
+  docker_compose:
+    project_name: unifi
+    definition:
+      version: '2'
+      services:
+        unifi:
+          image: jacobalberty/unifi:stable
+          environment:
+            TZ: Europe/Amsterdam
+            RUNAS_UID0: "false"
+            UNIFI_UID: 1000
+            UNIFI_GID: 1000
+          volumes:
+            - "{{ service_dir }}/unifi:/unifi"
+          network_mode: host
+          restart: unless-stopped

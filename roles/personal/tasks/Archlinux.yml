@@ -1,4 +1,5 @@
 ---
+# FIXME: dies on newer ansible with list index out of range
 #- name: Install user Arch packages
 #  become: true
 #  pacman:
